@@ -12,7 +12,7 @@ namespace Domain.Models.BlogArticles
     public class BlogArticle : Entity<int>, IAggregateRoot
     {
         private readonly HashSet<BlogArticleTranslation> blogArticleTranslations;
-
+     
         internal BlogArticle(DateTime dateOfCreation, DateTime dateOfLastEdit, HashSet<BlogArticleTranslation> blogArticleTranslations, byte[] imageByteArray)
         {
             this.ValidateDateOfCreation(dateOfCreation);
@@ -42,11 +42,30 @@ namespace Domain.Models.BlogArticles
 
         public IReadOnlyCollection<BlogArticleTranslation> BlogArticleTranslations => this.blogArticleTranslations.ToList().AsReadOnly();
 
-        public void AddTranslation(BlogArticleTranslation translation)
+        public BlogArticleTranslation GetSpecificTranslation(Language language)
         {
-            this.ValidateTranslationExist(translation);
+            var translation = this.blogArticleTranslations
+                .Where(t => t.Language.Equals(language))
+                .FirstOrDefault();
 
-            this.blogArticleTranslations.Add(translation);
+            return translation;
+        }
+        public BlogArticle AddTranslation(params BlogArticleTranslation[] translations)
+        {
+            this.ValidateInputCollectionAreNullOrEmpty(
+                translations?.Length ?? 0, 
+                BlogArticleTranslationsMinLength, 
+                BlogArticleTranslationsMaxLength, 
+                nameof(translations));
+
+            foreach (var translation in translations)
+            {
+                this.ValidateInputTranslationExist(translation);
+
+                this.blogArticleTranslations.Add(translation);
+            }
+
+            return this;
         }
 
         public BlogArticle EditTranslation(BlogArticleTranslation updatedTranslation)
@@ -122,10 +141,10 @@ namespace Domain.Models.BlogArticles
 
         private void ValidateImageByteArray(byte[] arr, int minLength, int maxLength, string? propertyName = "value")
         {
-            Guard.AgainstByteArrayLength<InvalidBlogArticleException>(arr?.Count() ?? 0, minLength, maxLength, propertyName);
+            Guard.AgainstCollectionLength<InvalidBlogArticleException>(arr?.Count() ?? 0, minLength, maxLength, propertyName);
         }
 
-        public void ValidateTranslationExist(BlogArticleTranslation translation)
+        public void ValidateInputTranslationExist(BlogArticleTranslation translation)
         {
             var id = translation.Id;
 
@@ -133,6 +152,11 @@ namespace Domain.Models.BlogArticles
             {
                 throw new InvalidBlogArticleTranslationException($"There cannot be two translations for one language:{ translation.Language.Name }");
             }
+        }
+
+        private void ValidateInputCollectionAreNullOrEmpty(int length, int minLength, int maxLength, string nameOfCollection = "Collection")
+        {
+            Guard.AgainstCollectionLength<InvalidBlogArticleException>(length, minLength, maxLength, nameOfCollection);
         }
     }
 }
