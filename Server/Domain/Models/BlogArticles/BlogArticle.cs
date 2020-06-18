@@ -16,7 +16,7 @@ namespace Domain.Models.BlogArticles
         internal BlogArticle(DateTime dateOfCreation, DateTime dateOfLastEdit, HashSet<BlogArticleTranslation> blogArticleTranslations, byte[] imageByteArray)
         {
             this.ValidateDateOfCreation(dateOfCreation);
-            this.ValidateImageByteArray(imageByteArray, ImageByteArrayMinSize, ImageByteArrayMaxSize, nameof(imageByteArray));
+            this.ValidateInputCollectionAreNullOrEmpty(imageByteArray?.Length ?? 0, ImageByteArrayMinSize, ImageByteArrayMaxSize, nameof(imageByteArray));
 
             this.blogArticleTranslations = blogArticleTranslations;
             this.DateOfCreation = dateOfCreation;
@@ -117,7 +117,7 @@ namespace Domain.Models.BlogArticles
 
         public BlogArticle UpdateImageByteArray(byte[] newImageByteArr)
         {
-            this.ValidateImageByteArray(newImageByteArr, ImageByteArrayMinSize, ImageByteArrayMaxSize, nameof(imageByteArray));
+            this.ValidateInputCollectionAreNullOrEmpty(newImageByteArr?.Count() ?? 0, ImageByteArrayMinSize, ImageByteArrayMaxSize, nameof(newImageByteArr));
 
             this.imageByteArray = newImageByteArr;
 
@@ -139,16 +139,11 @@ namespace Domain.Models.BlogArticles
             throw new InvalidBlogArticleException($"Invalid translation with id: {id}");
         }
 
-        private void ValidateImageByteArray(byte[] arr, int minLength, int maxLength, string? propertyName = "value")
-        {
-            Guard.AgainstCollectionLength<InvalidBlogArticleException>(arr?.Count() ?? 0, minLength, maxLength, propertyName);
-        }
-
         public void ValidateInputTranslationExist(BlogArticleTranslation translation)
         {
-            var id = translation.Id;
+            var language = translation.Language.Value;
 
-            if (this.blogArticleTranslations.Any(t => t.Id == id))
+            if (this.blogArticleTranslations.Any(t => t.Language.Value == language))
             {
                 throw new InvalidBlogArticleTranslationException($"There cannot be two translations for one language:{ translation.Language.Name }");
             }
