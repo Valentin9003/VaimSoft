@@ -87,10 +87,10 @@ namespace Domain.Common
             ThrowException<TException>($"{name} cannot be edited after initialization");
         }
 
-        public static void AgainstByteArrayLength<TException>(int length, int min, int max, string? propertyName = "Property")
+        public static void AgainstCollectionLength<TException>(int length, int min, int max, string? propertyName = "Property")
           where TException : BaseDomainException, new()
         {
-            if (!(min > length || length > max))
+            if (!(min >= length || length > max))
             {
                 return;
             }
