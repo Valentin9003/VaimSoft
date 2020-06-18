@@ -17,7 +17,7 @@ namespace Startup
 
         public IConfiguration Configuration { get; }
 
-        public void ConfigureServices(IServiceCollection services) 
+        public void ConfigureServices(IServiceCollection services)
             => services
                 .AddDomain()
                 .AddApplication(this.Configuration)
@@ -42,8 +42,8 @@ namespace Startup
                 .UseAuthentication()
                 .UseAuthorization()
                 .UseEndpoints(endpoints => endpoints
-                    .MapControllers());
-              //.Initialize();
+                    .MapControllers())
+                .Initialize();
         }
     }
 }

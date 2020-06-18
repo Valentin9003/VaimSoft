@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "VaimSoft": {
+    "StartUp": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "",
